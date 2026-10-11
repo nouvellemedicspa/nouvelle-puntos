@@ -1,0 +1,23 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#EDE5D8"><title>Nouvelle · Puntos</title><link rel="stylesheet" href="styles.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script></head>
+<body><main class="shell narrow">
+  <header class="brand"><div class="brand-mark">N</div><div class="brand-name">NOUVELLE</div><div class="brand-sub">Spa & Medicina Estética</div></header>
+  <section id="searchView" class="card search-card">
+    <div class="eyebrow">Programa de puntos</div><h1 style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:500;margin:8px 0 4px;color:#5b493c">Consulta tu tarjeta</h1><p class="muted">Ingresa tu folio Nouvelle para ver tus puntos, beneficio disponible y movimientos.</p>
+    <div class="search-row"><input id="codeInput" class="input" placeholder="Ej. N-0247" autocomplete="off"><button id="searchBtn" class="btn gold">Consultar</button></div><div id="status" class="hidden"></div>
+    <div class="status" style="margin-top:16px">Versión de prueba: puedes usar el folio <strong>N-0247</strong>.</div>
+  </section>
+  <div id="cardView" class="hidden">
+    <section class="card loyalty-card">
+      <div class="card-title">Tarjeta Digital de Puntos</div>
+      <div class="member"><h1 id="clientName" class="member-name">—</h1><div id="clientCode" class="member-code">—</div></div>
+      <div class="points-panel"><div class="points-value"><span id="points">0</span> <span>puntos</span></div><div id="pointsMoney" class="points-money">Equivalen a $0 MXN</div></div>
+      <div class="info-grid"><div class="info-pill"><strong>1 punto</strong>por cada $100 gastados</div><div class="info-pill"><strong>$5 MXN</strong>por cada punto</div></div>
+      <div class="qr-wrap"><div id="qrcode" class="qr-box"></div><div class="qr-caption">Tu código Nouvelle</div></div>
+      <div class="details-row"><div class="detail"><strong>Última compra</strong><span id="lastPurchase">—</span></div><div class="detail"><strong>Vigencia</strong><span id="expiresAt">—</span></div></div>
+      <div class="card-footer">Cuidarte también suma</div>
+    </section>
+    <section class="card section"><div class="section-head"><div><div class="eyebrow">Actividad</div><h2>Movimientos recientes</h2></div><button id="termsBtn" class="link-button">Términos</button></div><div id="movements" class="movements"></div></section>
+    <section id="terms" class="card section hidden"><div class="section-head"><div><div class="eyebrow">Nouvelle</div><h3>Términos y condiciones</h3></div></div><div class="terms"><ol><li>Por cada $100 MXN efectivamente pagados se acumula 1 punto Nouvelle.</li><li>Cada punto tiene un valor de $5 MXN para canje en servicios participantes.</li><li>Los puntos pueden cubrir como máximo el 25% del valor de cada compra.</li><li>Los puntos tienen vigencia de 12 meses a partir de la última compra que genere puntos; cada nueva compra renueva la vigencia.</li><li>No existe límite máximo de acumulación.</li><li>La parte pagada con puntos no genera nuevos puntos.</li><li>Los puntos son personales, intransferibles y no son canjeables por efectivo.</li><li>Promociones, paquetes o tratamientos seleccionados pueden quedar excluidos del canje.</li></ol></div></section>
+    <div style="text-align:center;margin:18px 0"><button id="backBtn" class="btn ghost small">Consultar otro folio</button></div>
+  </div>
+</main><script src="config.js"></script><script src="common.js"></script><script src="public.js"></script></body></html>
