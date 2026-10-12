@@ -37,5 +37,5 @@ function baseUrl(){
   if(CFG.PUBLIC_BASE_URL) return CFG.PUBLIC_BASE_URL.replace(/\/$/,'')+'/';
   return location.href.split('?')[0].replace(/admin\.html$/,'').replace(/index\.html$/,'');
 }
-function cardUrl(code){return `${baseUrl()}?codigo=${encodeURIComponent(code)}`}
+function cardUrl(identifier){const key=CFG.DEMO_MODE?'codigo':'token';return `${baseUrl()}?${key}=${encodeURIComponent(identifier)}`}
 function toast(msg){const t=document.getElementById('toast');if(!t)return; t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),2500)}

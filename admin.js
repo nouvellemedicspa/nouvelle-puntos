@@ -42,8 +42,8 @@ async function apiMovements(clientId){
   const {data,error}=await supa.rpc('admin_list_movements',{p_client_id:clientId,p_limit:100}); if(error) throw error; return data||[];
 }
 async function apiCreateClient(payload){
-  if(CFG.DEMO_MODE||!supa){const db=demoDb();const c={id:'c'+Date.now(),code:makeCode(db),name:payload.name,phone:payload.phone||'',points:0,total_spent:0,last_purchase:null,expires_at:null,created_at:isoDate(new Date())};db.clients.push(c);saveDemo(db);return c;}
-  const {data,error}=await supa.rpc('admin_create_client',{p_name:payload.name,p_phone:payload.phone||null});if(error)throw error;return Array.isArray(data)?data[0]:data;
+  if(CFG.DEMO_MODE||!supa){const db=demoDb();const c={id:'c'+Date.now(),code:makeCode(db),public_token:'demo-'+Date.now(),name:payload.name,phone:payload.phone||'',email:payload.email||'',points:0,total_spent:0,last_purchase:null,expires_at:null,created_at:isoDate(new Date())};db.clients.push(c);saveDemo(db);return c;}
+  const {data,error}=await supa.rpc('admin_create_client',{p_name:payload.name,p_phone:payload.phone||null,p_email:payload.email||null});if(error)throw error;return Array.isArray(data)?data[0]:data;
 }
 async function apiRegisterPurchase(clientId,gross,redeemMxn,note){
   if(CFG.DEMO_MODE||!supa){
@@ -62,7 +62,7 @@ async function logout(){if(supa)await supa.auth.signOut();location.reload()}
 function getSelected(clients){return clients.find(c=>c.id===selectedId)||clients[0]}
 function calcStats(clients){return {count:clients.length,points:clients.reduce((s,c)=>s+Number(c.points||0),0),liability:clients.reduce((s,c)=>s+mxnFromPoints(c.points),0),spent:clients.reduce((s,c)=>s+Number(c.total_spent||0),0)}}
 function renderStats(clients){const s=calcStats(clients);document.getElementById('statClients').textContent=num(s.count);document.getElementById('statPoints').textContent=num(s.points);document.getElementById('statLiability').textContent=money(s.liability);document.getElementById('statSpent').textContent=money(s.spent)}
-function renderList(clients){const q=(document.getElementById('clientSearch').value||'').toLowerCase();const list=clients.filter(c=>(c.name+' '+c.code+' '+(c.phone||'')).toLowerCase().includes(q));document.getElementById('clientList').innerHTML=list.map(c=>`<button class="client-item ${c.id===selectedId?'active':''}" data-id="${c.id}"><strong>${c.name}</strong><span>${c.code} · ${num(c.points)} pts · ${money(mxnFromPoints(c.points))}</span></button>`).join('')||'<div class="muted">Sin resultados.</div>';document.querySelectorAll('.client-item').forEach(b=>b.onclick=()=>{selectedId=b.dataset.id;refresh()})}
+function renderList(clients){const q=(document.getElementById('clientSearch').value||'').toLowerCase();const list=clients.filter(c=>(c.name+' '+c.code+' '+(c.phone||'')+' '+(c.email||'')).toLowerCase().includes(q));document.getElementById('clientList').innerHTML=list.map(c=>`<button class="client-item ${c.id===selectedId?'active':''}" data-id="${c.id}"><strong>${c.name}</strong><span>${c.code} · ${num(c.points)} pts · ${money(mxnFromPoints(c.points))}</span></button>`).join('')||'<div class="muted">Sin resultados.</div>';document.querySelectorAll('.client-item').forEach(b=>b.onclick=()=>{selectedId=b.dataset.id;refresh()})}
 function movementRow(m){return `<tr><td>${displayDate(m.date)}</td><td>${m.type==='adjustment'?'Ajuste':Number(m.redeemed_mxn)>0?'Compra + canje':'Compra'}</td><td>${money(m.gross||0)}</td><td>${money(m.redeemed_mxn||0)}</td><td>${money(m.paid||0)}</td><td class="${Number(m.points_delta)>=0?'plus':'minus'}">${Number(m.points_delta)>=0?'+':''}${num(m.points_delta)}</td><td>${m.note||''}</td></tr>`}
 async function renderSelected(c){
   if(!c){
@@ -70,35 +70,30 @@ async function renderSelected(c){
     document.getElementById('clientPanel').classList.add('hidden');
     return;
   }
-
   document.getElementById('emptyState').classList.add('hidden');
   document.getElementById('clientPanel').classList.remove('hidden');
   document.getElementById('selName').textContent=c.name;
-  document.getElementById('selMeta').textContent=`${c.code}${c.phone?' · '+c.phone:''} · vigencia ${displayDate(c.expires_at)}`;
+
+  const meta=[c.code];
+  if(c.phone) meta.push(c.phone);
+  if(c.email) meta.push(c.email);
+  meta.push(`vigencia ${displayDate(c.expires_at)}`);
+  document.getElementById('selMeta').textContent=meta.join(' · ');
+
   document.getElementById('selPoints').textContent=`${num(c.points)} pts`;
   document.getElementById('selMoney').textContent=money(mxnFromPoints(c.points));
   document.getElementById('availableRedeem').textContent=money(mxnFromPoints(c.points));
 
-  // Liga pública de la clienta. Se configura antes de cualquier dato opcional
-  // para que Abrir/Copiar/WhatsApp nunca queden con href="#".
-  const publicUrl=cardUrl(c.code);
-  const linkField=document.getElementById('clientLinkField');
-  const openLink=document.getElementById('openCardLink');
-  const whatsappLink=document.getElementById('whatsappLink');
-  const copyBtn=document.getElementById('copyLinkBtn');
-  const selectBtn=document.getElementById('selectLinkBtn');
-
-  if(linkField) linkField.value=publicUrl;
-  if(openLink) openLink.href=publicUrl;
-  if(whatsappLink){
-    whatsappLink.href='https://wa.me/?text='+encodeURIComponent('Tu Tarjeta Nouvelle: '+publicUrl);
-  }
-  if(copyBtn) copyBtn.onclick=(e)=>copyClientLink(publicUrl,e.currentTarget);
-  if(selectBtn) selectBtn.onclick=(e)=>copyClientLink(publicUrl,e.currentTarget);
+  const publicIdentifier = CFG.DEMO_MODE ? c.code : c.public_token;
+  const publicUrl=cardUrl(publicIdentifier);
+  document.getElementById('clientLinkField').value=publicUrl;
+  document.getElementById('openCardLink').href=publicUrl;
+  document.getElementById('whatsappLink').href='https://wa.me/?text='+encodeURIComponent('Tu Tarjeta Nouvelle: '+publicUrl);
+  document.getElementById('copyLinkBtn').onclick=(e)=>copyClientLink(publicUrl,e.currentTarget);
+  document.getElementById('selectLinkBtn').onclick=(e)=>copyClientLink(publicUrl,e.currentTarget);
 
   const mv=await apiMovements(c.id);
-  document.getElementById('movementTable').innerHTML=
-    mv.map(movementRow).join('')||'<tr><td colspan="7" class="muted">Sin movimientos.</td></tr>';
+  document.getElementById('movementTable').innerHTML=mv.map(movementRow).join('')||'<tr><td colspan="7" class="muted">Sin movimientos.</td></tr>';
   updatePurchasePreview(c);
 }
 async function refresh(){const clients=await apiListClients();if(!selectedId&&clients.length)selectedId=clients[0].id;renderStats(clients);renderList(clients);await renderSelected(getSelected(clients));window.__clients=clients}
@@ -112,7 +107,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('logoutBtn').onclick=logout;
   document.getElementById('clientSearch').oninput=()=>renderList(window.__clients||[]);
   document.getElementById('newClientBtn').onclick=openModal;document.getElementById('modalCancel').onclick=closeModal;
-  document.getElementById('newClientForm').onsubmit=async e=>{e.preventDefault();try{const c=await apiCreateClient({name:document.getElementById('newName').value.trim(),phone:document.getElementById('newPhone').value.trim()});selectedId=c.id;closeModal();e.target.reset();await refresh();toast('Clienta creada')}catch(err){toast(err.message)}};
+  document.getElementById('newClientForm').onsubmit=async e=>{e.preventDefault();try{const c=await apiCreateClient({name:document.getElementById('newName').value.trim(),phone:document.getElementById('newPhone').value.trim(),email:document.getElementById('newEmail').value.trim()});selectedId=c.id;closeModal();e.target.reset();await refresh();toast('Clienta creada')}catch(err){toast(err.message)}};
   ['gross','redeem'].forEach(id=>document.getElementById(id).oninput=()=>updatePurchasePreview((window.__clients||[]).find(c=>c.id===selectedId)));
   document.getElementById('purchaseForm').onsubmit=async e=>{e.preventDefault();const gross=Number(document.getElementById('gross').value||0);if(gross<=0)return toast('Captura un importe válido');try{await apiRegisterPurchase(selectedId,gross,Number(document.getElementById('redeem').value||0),document.getElementById('note').value.trim());e.target.reset();await refresh();toast('Compra registrada correctamente')}catch(err){toast(err.message)}};
   document.getElementById('adjustForm').onsubmit=async e=>{e.preventDefault();const delta=Number(document.getElementById('adjustDelta').value||0);if(!delta)return toast('Captura un ajuste distinto de cero');try{await apiAdjust(selectedId,delta,document.getElementById('adjustNote').value.trim());e.target.reset();await refresh();toast('Ajuste registrado')}catch(err){toast(err.message)}};
