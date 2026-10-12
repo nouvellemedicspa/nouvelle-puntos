@@ -49,3 +49,6 @@ La Publishable/Anon Key puede estar en el navegador siempre que las políticas/R
 - Envío automático del enlace por WhatsApp.
 - Aviso de puntos por vencer.
 - Exportación de reportes.
+
+## v0.4 - enlace visible / Safari
+El botón "Copiar enlace" ahora siempre muestra el enlace público en un campo visible, intenta copiarlo automáticamente y, si Safari lo bloquea, deja el enlace seleccionado para copiarlo con Cmd+C. También se añadieron parámetros ?v=4 a los recursos del panel para evitar caché vieja de Safari/GitHub Pages.
