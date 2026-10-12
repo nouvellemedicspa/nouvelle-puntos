@@ -64,7 +64,43 @@ function calcStats(clients){return {count:clients.length,points:clients.reduce((
 function renderStats(clients){const s=calcStats(clients);document.getElementById('statClients').textContent=num(s.count);document.getElementById('statPoints').textContent=num(s.points);document.getElementById('statLiability').textContent=money(s.liability);document.getElementById('statSpent').textContent=money(s.spent)}
 function renderList(clients){const q=(document.getElementById('clientSearch').value||'').toLowerCase();const list=clients.filter(c=>(c.name+' '+c.code+' '+(c.phone||'')).toLowerCase().includes(q));document.getElementById('clientList').innerHTML=list.map(c=>`<button class="client-item ${c.id===selectedId?'active':''}" data-id="${c.id}"><strong>${c.name}</strong><span>${c.code} · ${num(c.points)} pts · ${money(mxnFromPoints(c.points))}</span></button>`).join('')||'<div class="muted">Sin resultados.</div>';document.querySelectorAll('.client-item').forEach(b=>b.onclick=()=>{selectedId=b.dataset.id;refresh()})}
 function movementRow(m){return `<tr><td>${displayDate(m.date)}</td><td>${m.type==='adjustment'?'Ajuste':Number(m.redeemed_mxn)>0?'Compra + canje':'Compra'}</td><td>${money(m.gross||0)}</td><td>${money(m.redeemed_mxn||0)}</td><td>${money(m.paid||0)}</td><td class="${Number(m.points_delta)>=0?'plus':'minus'}">${Number(m.points_delta)>=0?'+':''}${num(m.points_delta)}</td><td>${m.note||''}</td></tr>`}
-async function renderSelected(c){if(!c){document.getElementById('emptyState').classList.remove('hidden');document.getElementById('clientPanel').classList.add('hidden');return}document.getElementById('emptyState').classList.add('hidden');document.getElementById('clientPanel').classList.remove('hidden');document.getElementById('selName').textContent=c.name;document.getElementById('selMeta').textContent=`${c.code}${c.phone?' · '+c.phone:''} · vigencia ${displayDate(c.expires_at)}`;document.getElementById('selPoints').textContent=`${num(c.points)} pts`;document.getElementById('selMoney').textContent=money(mxnFromPoints(c.points));document.getElementById('purchaseClient').textContent=c.name;document.getElementById('availableRedeem').textContent=money(mxnFromPoints(c.points));const publicUrl=cardUrl(c.code);document.getElementById('clientLinkField').value=publicUrl;document.getElementById('openCardLink').href=publicUrl;document.getElementById('whatsappLink').href='https://wa.me/?text='+encodeURIComponent('Tu Tarjeta Nouvelle: '+publicUrl);document.getElementById('copyLinkBtn').onclick=(e)=>copyClientLink(publicUrl,e.currentTarget);document.getElementById('selectLinkBtn').onclick=(e)=>copyClientLink(publicUrl,e.currentTarget);const mv=await apiMovements(c.id);document.getElementById('movementTable').innerHTML=mv.map(movementRow).join('')||'<tr><td colspan="7" class="muted">Sin movimientos.</td></tr>';updatePurchasePreview(c)}
+async function renderSelected(c){
+  if(!c){
+    document.getElementById('emptyState').classList.remove('hidden');
+    document.getElementById('clientPanel').classList.add('hidden');
+    return;
+  }
+
+  document.getElementById('emptyState').classList.add('hidden');
+  document.getElementById('clientPanel').classList.remove('hidden');
+  document.getElementById('selName').textContent=c.name;
+  document.getElementById('selMeta').textContent=`${c.code}${c.phone?' · '+c.phone:''} · vigencia ${displayDate(c.expires_at)}`;
+  document.getElementById('selPoints').textContent=`${num(c.points)} pts`;
+  document.getElementById('selMoney').textContent=money(mxnFromPoints(c.points));
+  document.getElementById('availableRedeem').textContent=money(mxnFromPoints(c.points));
+
+  // Liga pública de la clienta. Se configura antes de cualquier dato opcional
+  // para que Abrir/Copiar/WhatsApp nunca queden con href="#".
+  const publicUrl=cardUrl(c.code);
+  const linkField=document.getElementById('clientLinkField');
+  const openLink=document.getElementById('openCardLink');
+  const whatsappLink=document.getElementById('whatsappLink');
+  const copyBtn=document.getElementById('copyLinkBtn');
+  const selectBtn=document.getElementById('selectLinkBtn');
+
+  if(linkField) linkField.value=publicUrl;
+  if(openLink) openLink.href=publicUrl;
+  if(whatsappLink){
+    whatsappLink.href='https://wa.me/?text='+encodeURIComponent('Tu Tarjeta Nouvelle: '+publicUrl);
+  }
+  if(copyBtn) copyBtn.onclick=(e)=>copyClientLink(publicUrl,e.currentTarget);
+  if(selectBtn) selectBtn.onclick=(e)=>copyClientLink(publicUrl,e.currentTarget);
+
+  const mv=await apiMovements(c.id);
+  document.getElementById('movementTable').innerHTML=
+    mv.map(movementRow).join('')||'<tr><td colspan="7" class="muted">Sin movimientos.</td></tr>';
+  updatePurchasePreview(c);
+}
 async function refresh(){const clients=await apiListClients();if(!selectedId&&clients.length)selectedId=clients[0].id;renderStats(clients);renderList(clients);await renderSelected(getSelected(clients));window.__clients=clients}
 function updatePurchasePreview(c){if(!c)return;const gross=Number(document.getElementById('gross').value||0);const requested=Number(document.getElementById('redeem').value||0);const maxPct=gross*CFG.MAX_REDEMPTION_PERCENT/100;const available=mxnFromPoints(c.points);const redeem=Math.max(0,Math.min(requested,maxPct,available));const paid=Math.max(0,gross-redeem);const earned=pointsFromPaid(paid);document.getElementById('purchasePreview').innerHTML=`Máximo por regla del ${CFG.MAX_REDEMPTION_PERCENT}%: <strong>${money(maxPct)}</strong><br>Canje aplicado: <strong>${money(redeem)}</strong><br>Pago efectivo: <strong>${money(paid)}</strong><br>Puntos a generar: <strong>${num(earned)} pts (${money(mxnFromPoints(earned))})</strong>`}
 function openModal(){document.getElementById('newClientModal').classList.remove('hidden')}function closeModal(){document.getElementById('newClientModal').classList.add('hidden')}
