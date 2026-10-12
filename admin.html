@@ -1,12 +1,317 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#EDE5D8"><title>Nouvelle · Administración de Puntos</title><link rel="stylesheet" href="styles.css?v=6"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#EDE5D8"><title>Nouvelle · Administración de Puntos</title><style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap');
+
+:root{
+  --ivory:#EDE5D8;
+  --greige:#D8C9B8;
+  --blush:#D8BEB8;
+  --white:#F8F6F1;
+  --gold:#C5A46D;
+  --oak:#A98B6D;
+  --charcoal:#191817;
+  --muted:#786f67;
+  --success:#6e8069;
+  --danger:#9d5b5b;
+  --shadow:0 18px 55px rgba(55,39,26,.12);
+  --radius:28px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--charcoal);
+  font-family:'Montserrat',system-ui,-apple-system,sans-serif;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(216,190,184,.30), transparent 28%),
+    radial-gradient(circle at 88% 0%, rgba(197,164,109,.16), transparent 25%),
+    linear-gradient(145deg,#fbf8f3 0%,#f2e9df 58%,#eee3d8 100%);
+}
+body::before{
+  content:"";
+  position:fixed; inset:0; pointer-events:none; opacity:.25;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+}
+a{color:inherit}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.shell{width:min(1120px,calc(100% - 28px)); margin:0 auto; padding:28px 0 56px}
+.shell.narrow{width:min(620px,calc(100% - 24px))}
+
+.brand{text-align:center;padding:10px 0 22px}
+.brand-mark{font-family:'Cormorant Garamond',serif;font-size:76px;line-height:.65;color:#77604e;font-weight:500;letter-spacing:-9px}
+.brand-name{font-family:'Cormorant Garamond',serif;font-size:38px;letter-spacing:9px;margin-left:9px;color:#665445;font-weight:500}
+.brand-sub{font-size:10px;letter-spacing:5px;color:#7a6757;margin-top:3px;text-transform:uppercase}
+.eyebrow{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--oak);font-weight:500}
+
+.card{
+  background:rgba(248,246,241,.86);
+  border:1px solid rgba(197,164,109,.42);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  backdrop-filter: blur(14px);
+}
+.loyalty-card{padding:32px 28px 24px; overflow:hidden; position:relative}
+.loyalty-card::after{content:"";position:absolute;width:460px;height:220px;border:1px solid rgba(197,164,109,.26);border-radius:50%;right:-170px;bottom:-150px;transform:rotate(-13deg)}
+.card-title{text-align:center;margin-top:4px;font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#695a4f}
+.member{text-align:center;margin:24px 0 4px}
+.member-name{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:500;margin:0;color:#5c493c}
+.member-code{font-size:11px;letter-spacing:3px;color:#7b6d63;text-transform:uppercase}
+.points-panel{margin:24px 0 20px;padding:24px;border-radius:24px;background:linear-gradient(135deg,rgba(216,190,184,.60),rgba(237,229,216,.80));text-align:center;border:1px solid rgba(197,164,109,.2)}
+.points-value{font-family:'Cormorant Garamond',serif;font-size:64px;line-height:1;color:#5c4636}
+.points-value span{font-size:30px}
+.points-money{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#695c52;margin-top:8px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 20px}
+.info-pill{padding:14px 12px;border-radius:18px;background:rgba(255,255,255,.45);border:1px solid rgba(169,139,109,.18);font-size:12px;line-height:1.55;text-align:center;color:#5f554e}
+.info-pill strong{display:block;font-weight:600;color:#4a4039}
+.qr-wrap{text-align:center;padding:6px 0 4px}
+.qr-box{display:inline-flex;align-items:center;justify-content:center;background:#fff;padding:12px;border-radius:18px;border:2px solid rgba(197,164,109,.7);box-shadow:0 8px 24px rgba(62,43,31,.08)}
+.qr-box canvas,.qr-box img{width:180px!important;height:180px!important}
+.qr-caption{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#74645a;margin-top:10px}
+.details-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid rgba(169,139,109,.22)}
+.detail{font-size:11px;line-height:1.5;color:#73675e;text-align:center}
+.detail strong{display:block;color:#4c423b;font-weight:500;margin-bottom:4px}
+.card-footer{text-align:center;margin-top:22px;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:#8a786a}
+
+.search-card{padding:26px;margin-top:12px}
+.search-row{display:flex;gap:10px;margin-top:15px}
+.input{width:100%;border:1px solid rgba(169,139,109,.32);background:rgba(255,255,255,.7);border-radius:14px;padding:13px 14px;color:var(--charcoal);outline:none;transition:.2s}
+.input:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(197,164,109,.10)}
+.btn{border:0;border-radius:14px;padding:13px 18px;background:var(--charcoal);color:#fff;letter-spacing:.3px;font-weight:500;transition:.2s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(25,24,23,.18)}
+.btn.secondary{background:var(--white);color:var(--charcoal);border:1px solid rgba(169,139,109,.36)}
+.btn.gold{background:linear-gradient(135deg,#b48e55,var(--gold));color:#fff}
+.btn.danger{background:#7b4d4d}
+.btn.ghost{background:transparent;color:#675a50;border:1px solid rgba(169,139,109,.3)}
+.btn.small{padding:9px 12px;font-size:12px;border-radius:11px}
+.link-button{background:none;border:0;padding:0;color:#705f52;text-decoration:underline;text-underline-offset:3px;font-size:12px}
+.status{border-radius:14px;padding:12px 14px;font-size:12px;margin-top:12px;background:rgba(197,164,109,.13);color:#6d5b4d}
+.status.error{background:rgba(157,91,91,.12);color:#844d4d}
+
+.section{margin-top:18px;padding:22px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:14px}
+.section h2,.section h3{margin:0;font-family:'Cormorant Garamond',serif;color:#57463a;font-weight:500}
+.section h2{font-size:28px}.section h3{font-size:22px}
+.muted{color:#84786f;font-size:12px;line-height:1.6}
+.movements{display:grid;gap:9px}
+.movement{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:rgba(255,255,255,.45);border:1px solid rgba(169,139,109,.14)}
+.movement-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(197,164,109,.15);color:#705b42;font-weight:600}
+.movement-title{font-size:12px;font-weight:600}.movement-meta{font-size:10px;color:#8a7d72;margin-top:3px}
+.movement-points{font-size:12px;font-weight:600;text-align:right}.plus{color:#61705d}.minus{color:#8a5555}
+.terms{font-size:11px;color:#665c54;line-height:1.75}.terms ol{padding-left:18px}.terms li{margin-bottom:7px}
+
+/* Admin */
+.admin-body{background:linear-gradient(145deg,#f7f2ea,#eee4d9)}
+.admin-shell{width:min(1250px,calc(100% - 28px));margin:0 auto;padding:18px 0 46px}
+.admin-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+.mini-brand{display:flex;align-items:center;gap:12px}.mini-n{font-family:'Cormorant Garamond',serif;font-size:44px;color:#705b49;line-height:1}.mini-brand strong{font-family:'Cormorant Garamond',serif;font-size:24px;letter-spacing:4px;font-weight:500}.mini-brand span{display:block;font-size:9px;letter-spacing:2px;color:#8a786c;text-transform:uppercase}
+.admin-badge{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 11px;border-radius:999px;background:rgba(197,164,109,.14);color:#785f3c;border:1px solid rgba(197,164,109,.25)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.stat{padding:18px}.stat-label{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#84776d}.stat-value{font-family:'Cormorant Garamond',serif;font-size:30px;margin-top:6px;color:#59483b}
+.admin-grid{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:start}
+.sidebar{padding:18px;position:sticky;top:14px}.client-list{display:grid;gap:8px;margin-top:13px;max-height:62vh;overflow:auto;padding-right:3px}
+.client-item{border:1px solid rgba(169,139,109,.16);background:rgba(255,255,255,.45);border-radius:15px;padding:12px;text-align:left;width:100%;color:inherit}.client-item:hover,.client-item.active{border-color:rgba(197,164,109,.72);background:rgba(237,229,216,.72)}
+.client-item strong{display:block;font-size:12px}.client-item span{font-size:10px;color:#8b7f75;margin-top:3px;display:block}
+.content-stack{display:grid;gap:14px}
+.client-header{padding:22px;display:flex;justify-content:space-between;gap:15px;align-items:start}.client-header h1{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:500;margin:0;color:#584639}.client-header p{margin:5px 0 0;color:#82756b;font-size:11px}
+.balance-chip{text-align:right;padding:12px 14px;border-radius:18px;background:linear-gradient(135deg,rgba(216,190,184,.6),rgba(237,229,216,.75));min-width:180px}.balance-chip strong{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:500;display:block}.balance-chip span{font-size:10px;color:#76665b;letter-spacing:1px}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.action-card{padding:20px}.action-card h3{font-family:'Cormorant Garamond',serif;font-size:23px;margin:0 0 12px;font-weight:500;color:#5a493d}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{font-size:10px;text-transform:uppercase;letter-spacing:1.3px;color:#81746b;display:block;margin:0 0 6px}.preview-box{padding:12px;border-radius:14px;background:rgba(237,229,216,.65);font-size:11px;line-height:1.6;color:#66584f;margin:11px 0}.preview-box strong{color:#4c4038}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:11px}.table th{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:#897c72;text-align:left;padding:9px 10px;border-bottom:1px solid rgba(169,139,109,.2)}.table td{padding:11px 10px;border-bottom:1px solid rgba(169,139,109,.12)}
+.modal-backdrop{position:fixed;inset:0;background:rgba(25,24,23,.44);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}.modal{width:min(520px,100%);padding:24px}.modal h2{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;margin:0 0 15px}.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.login-wrap{width:min(430px,calc(100% - 28px));margin:8vh auto}.login-card{padding:28px}.login-card h1{font-family:'Cormorant Garamond',serif;font-size:33px;font-weight:500;margin:10px 0 8px}
+.toast{position:fixed;right:18px;bottom:18px;background:#211f1d;color:#fff;padding:12px 15px;border-radius:13px;font-size:11px;box-shadow:0 12px 30px rgba(0,0,0,.2);z-index:30;opacity:0;transform:translateY(12px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){.stats{grid-template-columns:1fr 1fr}.admin-grid{grid-template-columns:1fr}.sidebar{position:static}.client-list{max-height:260px}.action-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.shell{width:min(100% - 16px,620px);padding-top:14px}.brand-mark{font-size:64px}.brand-name{font-size:31px;letter-spacing:7px}.brand-sub{letter-spacing:3.2px}.loyalty-card{padding:25px 18px 20px}.member-name{font-size:32px}.points-value{font-size:56px}.info-grid,.details-row{grid-template-columns:1fr 1fr}.qr-box canvas,.qr-box img{width:160px!important;height:160px!important}.search-row{flex-direction:column}.stats{grid-template-columns:1fr 1fr}.admin-shell{width:min(100% - 16px,1250px)}.admin-top{align-items:flex-start}.mini-brand strong{font-size:20px}.form-grid{grid-template-columns:1fr}.client-header{flex-direction:column}.balance-chip{text-align:left;width:100%}.action-grid{grid-template-columns:1fr}}
+
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head>
 <body class="admin-body">
 <div id="loginView" class="login-wrap"><div class="brand"><div class="brand-mark">N</div><div class="brand-name">NOUVELLE</div><div class="brand-sub">Administración de puntos</div></div><section class="card login-card"><div class="eyebrow">Acceso privado</div><h1>Panel administrativo</h1><p class="muted">Este panel pertenece al NUEVO sistema de Puntos Nouvelle y no modifica la página actual de sellos.</p><div id="demoNote" class="status hidden">Está configurado en <strong>modo demo local</strong>. Los datos se guardan solo en este navegador.</div><button id="demoBtn" class="btn gold hidden" style="width:100%;margin-top:12px">Entrar al demo</button><form id="loginForm"><div class="field" style="margin-top:15px"><label>Correo</label><input id="email" class="input" type="email" required></div><div class="field" style="margin-top:10px"><label>Contraseña</label><input id="password" class="input" type="password" required></div><button class="btn gold" style="width:100%;margin-top:14px">Entrar</button><div id="loginError" class="hidden"></div></form></section></div>
-<div id="appView" class="admin-shell hidden"><header class="admin-top"><div class="mini-brand"><div class="mini-n">N</div><div><strong>NOUVELLE</strong><span>Panel de puntos</span></div></div><div style="display:flex;gap:8px;align-items:center"><div id="modeBadge" class="admin-badge">—</div><button id="logoutBtn" class="btn secondary small">Salir</button></div></header>
+<div id="appView" class="admin-shell hidden"><header class="admin-top"><div class="mini-brand"><div class="mini-n">N</div><div><strong>NOUVELLE</strong><span>Panel de puntos</span></div></div><div style="display:flex;gap:8px;align-items:center"><div id="modeBadge" class="admin-badge">— · v0.7</div><button id="logoutBtn" class="btn secondary small">Salir</button></div></header>
 <div class="stats"><div class="card stat"><div class="stat-label">Clientas</div><div id="statClients" class="stat-value">0</div></div><div class="card stat"><div class="stat-label">Puntos activos</div><div id="statPoints" class="stat-value">0</div></div><div class="card stat"><div class="stat-label">Beneficio pendiente</div><div id="statLiability" class="stat-value">$0</div></div><div class="card stat"><div class="stat-label">Gasto registrado</div><div id="statSpent" class="stat-value">$0</div></div></div>
 <div class="admin-grid"><aside class="card sidebar"><div class="section-head"><div><div class="eyebrow">Base</div><h3>Clientas</h3></div><button id="newClientBtn" class="btn gold small">+ Nueva</button></div><input id="clientSearch" class="input" placeholder="Buscar nombre, folio o teléfono"><div id="clientList" class="client-list"></div><button id="resetDemo" class="btn ghost small" style="width:100%;margin-top:12px">Reiniciar demo</button></aside>
-<main class="content-stack"><section id="emptyState" class="card section"><h2>Selecciona una clienta</h2><p class="muted">Elige una clienta para registrar compras, canjes y consultar movimientos.</p></section><div id="clientPanel" class="hidden content-stack"><section class="card client-header"><div><div class="eyebrow">Cuenta Nouvelle</div><h1 id="selName">—</h1><p id="selMeta">—</p><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><a id="openCardLink" class="btn secondary small" href="#" target="_blank" rel="noopener">Abrir tarjeta</a><button id="copyLinkBtn" type="button" class="btn secondary small">Copiar enlace</button><a id="whatsappLink" class="btn secondary small" href="#" target="_blank" rel="noopener">Compartir por WhatsApp</a></div><div id="clientLinkBox" style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="clientLinkField" type="text" readonly aria-label="Enlace público de la clienta" style="flex:1;min-width:260px;padding:10px 12px;border:1px solid #D8C9B8;border-radius:12px;background:#F8F6F1;color:#191817;font-size:14px"><button id="selectLinkBtn" type="button" class="btn secondary small">Copiar</button></div></div><div class="balance-chip"><strong id="selPoints">0 pts</strong><span id="selMoney">$0 disponibles</span></div></section>
+<main class="content-stack"><section id="emptyState" class="card section"><h2>Selecciona una clienta</h2><p class="muted">Elige una clienta para registrar compras, canjes y consultar movimientos.</p></section><div id="clientPanel" class="hidden content-stack"><section class="card client-header"><div><div class="eyebrow">Cuenta Nouvelle</div><h1 id="selName">—</h1><p id="selMeta">—</p><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><a id="openCardLink" class="btn secondary small" href="#" target="_blank" rel="noopener">Abrir tarjeta</a><button id="copyLinkBtn" type="button" class="btn secondary small">Copiar enlace</button><a id="whatsappLink" class="btn secondary small" href="#" target="_blank" rel="noopener">Compartir por WhatsApp</a></div><div id="clientLinkBox" style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="clientLinkField" type="text" readonly aria-label="Enlace público de la clienta" style="flex:1;min-width:260px;padding:10px 12px;border:1px solid #D8C9B8;border-radius:12px;background:#F8F6F1;color:#191817;font-size:14px"><button id="selectLinkBtn" type="button" class="btn secondary small">Copiar</button><a id="clientLinkAnchor" href="#" target="_blank" rel="noopener" style="width:100%;overflow-wrap:anywhere;color:#7c6245;text-decoration:underline;font-size:13px">Abrir liga de la clienta</a></div></div><div class="balance-chip"><strong id="selPoints">0 pts</strong><span id="selMoney">$0 disponibles</span></div></section>
 <div class="action-grid"><section class="card action-card"><div class="eyebrow">Operación</div><h3>Registrar compra</h3><p class="muted">El sistema calcula automáticamente el 5% en puntos y limita el canje al 25% de la compra.</p><form id="purchaseForm"><div class="form-grid"><div class="field"><label>Importe del servicio</label><input id="gross" class="input" type="number" min="0" step="0.01" placeholder="$0.00" required></div><div class="field"><label>Usar saldo en pesos</label><input id="redeem" class="input" type="number" min="0" step="0.01" value="0"></div></div><div class="field" style="margin-top:10px"><label>Concepto / nota</label><input id="note" class="input" placeholder="Ej. Facial hidratante"></div><div id="purchasePreview" class="preview-box">Captura un importe para ver el cálculo.</div><div class="muted">Saldo disponible para canje: <strong id="availableRedeem">$0.00</strong></div><button class="btn gold" style="width:100%;margin-top:12px">Registrar compra</button></form></section>
 <section class="card action-card"><div class="eyebrow">Control</div><h3>Ajuste de puntos</h3><p class="muted">Solo para correcciones justificadas. Cada ajuste queda registrado en el historial.</p><form id="adjustForm"><div class="field"><label>Puntos (+ o −)</label><input id="adjustDelta" class="input" type="number" step="0.01" placeholder="Ej. 2.5 o -2"></div><div class="field" style="margin-top:10px"><label>Motivo</label><input id="adjustNote" class="input" placeholder="Motivo del ajuste"></div><button class="btn secondary" style="width:100%;margin-top:12px">Guardar ajuste</button></form></section></div>
 <section class="card section"><div class="section-head"><div><div class="eyebrow">Auditoría</div><h2>Historial de movimientos</h2></div></div><div class="table-wrap"><table class="table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Servicio</th><th>Canje</th><th>Pagado</th><th>Puntos</th><th>Nota</th></tr></thead><tbody id="movementTable"></tbody></table></div></section></div></main></div></div>
 <div id="newClientModal" class="modal-backdrop hidden"><section class="card modal"><div class="eyebrow">Alta</div><h2>Nueva clienta</h2><form id="newClientForm"><div class="field"><label>Nombre completo</label><input id="newName" class="input" required></div><div class="field" style="margin-top:10px"><label>Teléfono</label><input id="newPhone" class="input" inputmode="tel"></div><div class="modal-actions"><button type="button" id="modalCancel" class="btn secondary">Cancelar</button><button class="btn gold">Crear tarjeta</button></div></form></section></div><div id="toast" class="toast"></div>
-<script src="config.js?v=6"></script><script src="common.js?v=6"></script><script src="admin.js?v=6"></script></body></html>
+<script>
+window.NOUVELLE_CONFIG = {
+  DEMO_MODE: true,
+  SUPABASE_URL: "",
+  SUPABASE_ANON_KEY: "",
+  POINTS_PER_100: 1,
+  POINT_VALUE_MXN: 5,
+  MAX_REDEMPTION_PERCENT: 25,
+  EXPIRY_MONTHS: 12,
+  PUBLIC_BASE_URL: "https://nouvellemedicspa.github.io/nouvelle-puntos/"
+};
+
+const CFG = window.NOUVELLE_CONFIG;
+const DEMO_KEY = 'nouvelle_points_demo_v1';
+
+const money = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:2}).format(Number(n||0));
+const num = n => new Intl.NumberFormat('es-MX',{maximumFractionDigits:2}).format(Number(n||0));
+const isoDate = d => new Date(d).toISOString().slice(0,10);
+const displayDate = d => d ? new Intl.DateTimeFormat('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(d+'T12:00:00')) : '—';
+const addMonths = (dateStr, months) => { const d=new Date((dateStr||isoDate(new Date()))+'T12:00:00'); d.setMonth(d.getMonth()+months); return isoDate(d); };
+const pointsFromPaid = paid => Math.round((Number(paid||0)/100)*CFG.POINTS_PER_100*100)/100;
+const mxnFromPoints = pts => Math.round(Number(pts||0)*CFG.POINT_VALUE_MXN*100)/100;
+const pointsFromMxn = mxn => Math.round((Number(mxn||0)/CFG.POINT_VALUE_MXN)*100)/100;
+
+function seedDemo(){
+  const existing=localStorage.getItem(DEMO_KEY); if(existing) return JSON.parse(existing);
+  const today=isoDate(new Date());
+  const db={
+    clients:[
+      {id:'c1',code:'N-0247',name:'Mariana López',phone:'55 1234 5678',points:56,total_spent:11200,last_purchase:today,expires_at:addMonths(today,12),created_at:today},
+      {id:'c2',code:'N-0248',name:'Fernanda Ruiz',phone:'55 9876 1122',points:18.5,total_spent:3700,last_purchase:today,expires_at:addMonths(today,12),created_at:today},
+      {id:'c3',code:'N-0249',name:'Andrea Gómez',phone:'55 4567 8890',points:7,total_spent:1400,last_purchase:today,expires_at:addMonths(today,12),created_at:today}
+    ],
+    movements:[
+      {id:'m1',client_id:'c1',date:today,type:'purchase',gross:3500,redeemed_mxn:0,paid:3500,points_delta:35,note:'Tratamiento'},
+      {id:'m2',client_id:'c1',date:today,type:'redeem',gross:600,redeemed_mxn:100,paid:500,points_delta:-20,note:'Canje + compra'},
+      {id:'m3',client_id:'c1',date:today,type:'purchase',gross:2100,redeemed_mxn:0,paid:2100,points_delta:21,note:'Servicios'}
+    ]
+  };
+  localStorage.setItem(DEMO_KEY,JSON.stringify(db)); return db;
+}
+function getDemo(){return seedDemo()}
+function saveDemo(db){localStorage.setItem(DEMO_KEY,JSON.stringify(db))}
+function makeCode(db){
+  const nums=db.clients.map(c=>Number(String(c.code).replace(/\D/g,''))).filter(Boolean);
+  const next=Math.max(250,...nums)+1; return `N-${String(next).padStart(4,'0')}`;
+}
+function baseUrl(){
+  if(CFG.PUBLIC_BASE_URL) return CFG.PUBLIC_BASE_URL.replace(/\/$/,'')+'/';
+  return location.href.split('?')[0].replace(/admin\.html$/,'').replace(/index\.html$/,'');
+}
+function cardUrl(code){return `https://nouvellemedicspa.github.io/nouvelle-puntos/?codigo=${encodeURIComponent(code)}`}
+function toast(msg){const t=document.getElementById('toast');if(!t)return; t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),2500)}
+
+
+let supa=null, session=null, selectedId=null;
+
+function copyClientLink(text, btn){
+  const field=document.getElementById('clientLinkField');
+  if(!field) return;
+  field.value=text;
+  field.focus();
+  field.select();
+  try{ field.setSelectionRange(0, field.value.length); }catch(_){ }
+
+  let copied=false;
+  try{ copied=document.execCommand('copy'); }catch(_){ copied=false; }
+  if(copied){
+    if(btn){ const old=btn.textContent; btn.textContent='¡Copiado!'; setTimeout(()=>btn.textContent=old,1600); }
+    toast('Enlace copiado');
+    return;
+  }
+
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>{
+      if(btn){ const old=btn.textContent; btn.textContent='¡Copiado!'; setTimeout(()=>btn.textContent=old,1600); }
+      toast('Enlace copiado');
+    }).catch(()=>{
+      window.prompt('Copia este enlace:', text);
+    });
+  }else{
+    window.prompt('Copia este enlace:', text);
+  }
+}
+
+async function initSupabase(){
+  if(CFG.DEMO_MODE || !CFG.SUPABASE_URL || !CFG.SUPABASE_ANON_KEY) return;
+  supa=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY);
+}
+function demoDb(){return getDemo()}
+async function apiListClients(){
+  if(CFG.DEMO_MODE||!supa) return demoDb().clients.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const {data,error}=await supa.rpc('admin_list_clients'); if(error) throw error; return data||[];
+}
+async function apiMovements(clientId){
+  if(CFG.DEMO_MODE||!supa) return demoDb().movements.filter(m=>m.client_id===clientId).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const {data,error}=await supa.rpc('admin_list_movements',{p_client_id:clientId,p_limit:100}); if(error) throw error; return data||[];
+}
+async function apiCreateClient(payload){
+  if(CFG.DEMO_MODE||!supa){const db=demoDb();const c={id:'c'+Date.now(),code:makeCode(db),name:payload.name,phone:payload.phone||'',points:0,total_spent:0,last_purchase:null,expires_at:null,created_at:isoDate(new Date())};db.clients.push(c);saveDemo(db);return c;}
+  const {data,error}=await supa.rpc('admin_create_client',{p_name:payload.name,p_phone:payload.phone||null});if(error)throw error;return Array.isArray(data)?data[0]:data;
+}
+async function apiRegisterPurchase(clientId,gross,redeemMxn,note){
+  if(CFG.DEMO_MODE||!supa){
+    const db=demoDb();const c=db.clients.find(x=>x.id===clientId);if(!c)throw new Error('Cliente no encontrado');
+    const maxByPercent=Number(gross)*CFG.MAX_REDEMPTION_PERCENT/100;const available=mxnFromPoints(c.points);const redeem=Math.max(0,Math.min(Number(redeemMxn||0),maxByPercent,available));const paid=Math.max(0,Number(gross)-redeem);const earned=pointsFromPaid(paid);const used=pointsFromMxn(redeem);c.points=Math.round((Number(c.points)-used+earned)*100)/100;c.total_spent=Math.round((Number(c.total_spent)+paid)*100)/100;c.last_purchase=isoDate(new Date());c.expires_at=addMonths(c.last_purchase,CFG.EXPIRY_MONTHS);
+    db.movements.push({id:'m'+Date.now(),client_id:c.id,date:c.last_purchase,type:redeem>0?'redeem':'purchase',gross:Number(gross),redeemed_mxn:redeem,paid,points_delta:Math.round((earned-used)*100)/100,note:note||''});saveDemo(db);return c;
+  }
+  const {data,error}=await supa.rpc('admin_register_purchase',{p_client_id:clientId,p_gross:Number(gross),p_redeem_mxn:Number(redeemMxn||0),p_note:note||null});if(error)throw error;return Array.isArray(data)?data[0]:data;
+}
+async function apiAdjust(clientId,delta,note){
+  if(CFG.DEMO_MODE||!supa){const db=demoDb();const c=db.clients.find(x=>x.id===clientId);c.points=Math.max(0,Math.round((Number(c.points)+Number(delta))*100)/100);db.movements.push({id:'m'+Date.now(),client_id:c.id,date:isoDate(new Date()),type:'adjustment',gross:0,redeemed_mxn:0,paid:0,points_delta:Number(delta),note:note||'Ajuste manual'});saveDemo(db);return c;}
+  const {data,error}=await supa.rpc('admin_adjust_points',{p_client_id:clientId,p_points_delta:Number(delta),p_note:note||null});if(error)throw error;return Array.isArray(data)?data[0]:data;
+}
+async function login(email,password){const {data,error}=await supa.auth.signInWithPassword({email,password});if(error)throw error;session=data.session;return session}
+async function logout(){if(supa)await supa.auth.signOut();location.reload()}
+function getSelected(clients){return clients.find(c=>c.id===selectedId)||clients[0]}
+function calcStats(clients){return {count:clients.length,points:clients.reduce((s,c)=>s+Number(c.points||0),0),liability:clients.reduce((s,c)=>s+mxnFromPoints(c.points),0),spent:clients.reduce((s,c)=>s+Number(c.total_spent||0),0)}}
+function renderStats(clients){const s=calcStats(clients);document.getElementById('statClients').textContent=num(s.count);document.getElementById('statPoints').textContent=num(s.points);document.getElementById('statLiability').textContent=money(s.liability);document.getElementById('statSpent').textContent=money(s.spent)}
+function renderList(clients){const q=(document.getElementById('clientSearch').value||'').toLowerCase();const list=clients.filter(c=>(c.name+' '+c.code+' '+(c.phone||'')).toLowerCase().includes(q));document.getElementById('clientList').innerHTML=list.map(c=>`<button class="client-item ${c.id===selectedId?'active':''}" data-id="${c.id}"><strong>${c.name}</strong><span>${c.code} · ${num(c.points)} pts · ${money(mxnFromPoints(c.points))}</span></button>`).join('')||'<div class="muted">Sin resultados.</div>';document.querySelectorAll('.client-item').forEach(b=>b.onclick=()=>{selectedId=b.dataset.id;refresh()})}
+function movementRow(m){return `<tr><td>${displayDate(m.date)}</td><td>${m.type==='adjustment'?'Ajuste':Number(m.redeemed_mxn)>0?'Compra + canje':'Compra'}</td><td>${money(m.gross||0)}</td><td>${money(m.redeemed_mxn||0)}</td><td>${money(m.paid||0)}</td><td class="${Number(m.points_delta)>=0?'plus':'minus'}">${Number(m.points_delta)>=0?'+':''}${num(m.points_delta)}</td><td>${m.note||''}</td></tr>`}
+async function renderSelected(c){
+  if(!c){
+    document.getElementById('emptyState').classList.remove('hidden');
+    document.getElementById('clientPanel').classList.add('hidden');
+    return;
+  }
+
+  document.getElementById('emptyState').classList.add('hidden');
+  document.getElementById('clientPanel').classList.remove('hidden');
+  document.getElementById('selName').textContent=c.name;
+  document.getElementById('selMeta').textContent=`${c.code}${c.phone?' · '+c.phone:''} · vigencia ${displayDate(c.expires_at)}`;
+  document.getElementById('selPoints').textContent=`${num(c.points)} pts`;
+  document.getElementById('selMoney').textContent=money(mxnFromPoints(c.points));
+  document.getElementById('availableRedeem').textContent=money(mxnFromPoints(c.points));
+
+  // Liga pública de la clienta. Se configura antes de cualquier dato opcional
+  // para que Abrir/Copiar/WhatsApp nunca queden con href="#".
+  const publicUrl=cardUrl(c.code);
+  const linkField=document.getElementById('clientLinkField');
+  const openLink=document.getElementById('openCardLink');
+  const whatsappLink=document.getElementById('whatsappLink');
+  const copyBtn=document.getElementById('copyLinkBtn');
+  const selectBtn=document.getElementById('selectLinkBtn');
+  const linkAnchor=document.getElementById('clientLinkAnchor');
+
+  if(linkField) linkField.value=publicUrl;
+  if(linkAnchor){linkAnchor.href=publicUrl;linkAnchor.textContent=publicUrl;}
+  if(openLink) openLink.href=publicUrl;
+  if(whatsappLink){
+    whatsappLink.href='https://api.whatsapp.com/send?text='+encodeURIComponent('Tu Tarjeta Nouvelle: '+publicUrl);
+  }
+  if(copyBtn) copyBtn.onclick=(e)=>copyClientLink(publicUrl,e.currentTarget);
+  if(selectBtn) selectBtn.onclick=(e)=>copyClientLink(publicUrl,e.currentTarget);
+
+  const mv=await apiMovements(c.id);
+  document.getElementById('movementTable').innerHTML=
+    mv.map(movementRow).join('')||'<tr><td colspan="7" class="muted">Sin movimientos.</td></tr>';
+  updatePurchasePreview(c);
+}
+async function refresh(){const clients=await apiListClients();if(!selectedId&&clients.length)selectedId=clients[0].id;renderStats(clients);renderList(clients);await renderSelected(getSelected(clients));window.__clients=clients}
+function updatePurchasePreview(c){if(!c)return;const gross=Number(document.getElementById('gross').value||0);const requested=Number(document.getElementById('redeem').value||0);const maxPct=gross*CFG.MAX_REDEMPTION_PERCENT/100;const available=mxnFromPoints(c.points);const redeem=Math.max(0,Math.min(requested,maxPct,available));const paid=Math.max(0,gross-redeem);const earned=pointsFromPaid(paid);document.getElementById('purchasePreview').innerHTML=`Máximo por regla del ${CFG.MAX_REDEMPTION_PERCENT}%: <strong>${money(maxPct)}</strong><br>Canje aplicado: <strong>${money(redeem)}</strong><br>Pago efectivo: <strong>${money(paid)}</strong><br>Puntos a generar: <strong>${num(earned)} pts (${money(mxnFromPoints(earned))})</strong>`}
+function openModal(){document.getElementById('newClientModal').classList.remove('hidden')}function closeModal(){document.getElementById('newClientModal').classList.add('hidden')}
+async function enterApp(){document.getElementById('loginView').classList.add('hidden');document.getElementById('appView').classList.remove('hidden');document.getElementById('modeBadge').textContent=(CFG.DEMO_MODE?'Modo demo local':'Supabase conectado')+' · v0.7';await refresh()}
+window.addEventListener('DOMContentLoaded',async()=>{
+  await initSupabase();
+  if(CFG.DEMO_MODE||!supa){document.getElementById('demoNote').classList.remove('hidden');document.getElementById('demoBtn').classList.remove('hidden');document.getElementById('loginForm').classList.add('hidden');document.getElementById('demoBtn').onclick=enterApp;} else {const {data}=await supa.auth.getSession();if(data.session){session=data.session;enterApp()} }
+  document.getElementById('loginForm').onsubmit=async e=>{e.preventDefault();try{await login(document.getElementById('email').value,document.getElementById('password').value);enterApp()}catch(err){document.getElementById('loginError').textContent=err.message;document.getElementById('loginError').className='status error'}};
+  document.getElementById('logoutBtn').onclick=logout;
+  document.getElementById('clientSearch').oninput=()=>renderList(window.__clients||[]);
+  document.getElementById('newClientBtn').onclick=openModal;document.getElementById('modalCancel').onclick=closeModal;
+  document.getElementById('newClientForm').onsubmit=async e=>{e.preventDefault();try{const c=await apiCreateClient({name:document.getElementById('newName').value.trim(),phone:document.getElementById('newPhone').value.trim()});selectedId=c.id;closeModal();e.target.reset();await refresh();toast('Clienta creada')}catch(err){toast(err.message)}};
+  ['gross','redeem'].forEach(id=>document.getElementById(id).oninput=()=>updatePurchasePreview((window.__clients||[]).find(c=>c.id===selectedId)));
+  document.getElementById('purchaseForm').onsubmit=async e=>{e.preventDefault();const gross=Number(document.getElementById('gross').value||0);if(gross<=0)return toast('Captura un importe válido');try{await apiRegisterPurchase(selectedId,gross,Number(document.getElementById('redeem').value||0),document.getElementById('note').value.trim());e.target.reset();await refresh();toast('Compra registrada correctamente')}catch(err){toast(err.message)}};
+  document.getElementById('adjustForm').onsubmit=async e=>{e.preventDefault();const delta=Number(document.getElementById('adjustDelta').value||0);if(!delta)return toast('Captura un ajuste distinto de cero');try{await apiAdjust(selectedId,delta,document.getElementById('adjustNote').value.trim());e.target.reset();await refresh();toast('Ajuste registrado')}catch(err){toast(err.message)}};
+  document.getElementById('resetDemo').onclick=()=>{if(confirm('¿Reiniciar los datos de prueba?')){localStorage.removeItem(DEMO_KEY);selectedId=null;refresh();toast('Demo reiniciada')}};
+});
+
+</script></body></html>
