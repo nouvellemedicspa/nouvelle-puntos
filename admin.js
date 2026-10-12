@@ -1,4 +1,30 @@
 let supa=null, session=null, selectedId=null;
+
+async function copyLinkRobust(text, btn){
+  const original = btn ? btn.textContent : '';
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta=document.createElement('textarea');
+      ta.value=text;
+      ta.setAttribute('readonly','');
+      ta.style.position='fixed';
+      ta.style.opacity='0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok=document.execCommand('copy');
+      ta.remove();
+      if(!ok) throw new Error('No se pudo copiar automáticamente');
+    }
+    if(btn){btn.textContent='¡Copiado!';setTimeout(()=>btn.textContent=original,1800)}
+    toast('Enlace copiado');
+  } catch(err) {
+    if(btn){btn.textContent='Ver enlace';setTimeout(()=>btn.textContent=original,2500)}
+    window.prompt('Safari no permitió copiar automáticamente. Copia este enlace:', text);
+  }
+}
+
 async function initSupabase(){
   if(CFG.DEMO_MODE || !CFG.SUPABASE_URL || !CFG.SUPABASE_ANON_KEY) return;
   supa=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY);
@@ -35,7 +61,7 @@ function calcStats(clients){return {count:clients.length,points:clients.reduce((
 function renderStats(clients){const s=calcStats(clients);document.getElementById('statClients').textContent=num(s.count);document.getElementById('statPoints').textContent=num(s.points);document.getElementById('statLiability').textContent=money(s.liability);document.getElementById('statSpent').textContent=money(s.spent)}
 function renderList(clients){const q=(document.getElementById('clientSearch').value||'').toLowerCase();const list=clients.filter(c=>(c.name+' '+c.code+' '+(c.phone||'')).toLowerCase().includes(q));document.getElementById('clientList').innerHTML=list.map(c=>`<button class="client-item ${c.id===selectedId?'active':''}" data-id="${c.id}"><strong>${c.name}</strong><span>${c.code} · ${num(c.points)} pts · ${money(mxnFromPoints(c.points))}</span></button>`).join('')||'<div class="muted">Sin resultados.</div>';document.querySelectorAll('.client-item').forEach(b=>b.onclick=()=>{selectedId=b.dataset.id;refresh()})}
 function movementRow(m){return `<tr><td>${displayDate(m.date)}</td><td>${m.type==='adjustment'?'Ajuste':Number(m.redeemed_mxn)>0?'Compra + canje':'Compra'}</td><td>${money(m.gross||0)}</td><td>${money(m.redeemed_mxn||0)}</td><td>${money(m.paid||0)}</td><td class="${Number(m.points_delta)>=0?'plus':'minus'}">${Number(m.points_delta)>=0?'+':''}${num(m.points_delta)}</td><td>${m.note||''}</td></tr>`}
-async function renderSelected(c){if(!c){document.getElementById('emptyState').classList.remove('hidden');document.getElementById('clientPanel').classList.add('hidden');return}document.getElementById('emptyState').classList.add('hidden');document.getElementById('clientPanel').classList.remove('hidden');document.getElementById('selName').textContent=c.name;document.getElementById('selMeta').textContent=`${c.code}${c.phone?' · '+c.phone:''} · vigencia ${displayDate(c.expires_at)}`;document.getElementById('selPoints').textContent=`${num(c.points)} pts`;document.getElementById('selMoney').textContent=money(mxnFromPoints(c.points));document.getElementById('purchaseClient').textContent=c.name;document.getElementById('availableRedeem').textContent=money(mxnFromPoints(c.points));document.getElementById('copyLinkBtn').onclick=()=>navigator.clipboard.writeText(cardUrl(c.code)).then(()=>toast('Enlace copiado'));document.getElementById('openCardBtn').onclick=()=>window.open(cardUrl(c.code),'_blank');const mv=await apiMovements(c.id);document.getElementById('movementTable').innerHTML=mv.map(movementRow).join('')||'<tr><td colspan="7" class="muted">Sin movimientos.</td></tr>';updatePurchasePreview(c)}
+async function renderSelected(c){if(!c){document.getElementById('emptyState').classList.remove('hidden');document.getElementById('clientPanel').classList.add('hidden');return}document.getElementById('emptyState').classList.add('hidden');document.getElementById('clientPanel').classList.remove('hidden');document.getElementById('selName').textContent=c.name;document.getElementById('selMeta').textContent=`${c.code}${c.phone?' · '+c.phone:''} · vigencia ${displayDate(c.expires_at)}`;document.getElementById('selPoints').textContent=`${num(c.points)} pts`;document.getElementById('selMoney').textContent=money(mxnFromPoints(c.points));document.getElementById('purchaseClient').textContent=c.name;document.getElementById('availableRedeem').textContent=money(mxnFromPoints(c.points));document.getElementById('copyLinkBtn').onclick=(e)=>copyLinkRobust(cardUrl(c.code),e.currentTarget);document.getElementById('openCardBtn').onclick=()=>window.open(cardUrl(c.code),'_blank');const mv=await apiMovements(c.id);document.getElementById('movementTable').innerHTML=mv.map(movementRow).join('')||'<tr><td colspan="7" class="muted">Sin movimientos.</td></tr>';updatePurchasePreview(c)}
 async function refresh(){const clients=await apiListClients();if(!selectedId&&clients.length)selectedId=clients[0].id;renderStats(clients);renderList(clients);await renderSelected(getSelected(clients));window.__clients=clients}
 function updatePurchasePreview(c){if(!c)return;const gross=Number(document.getElementById('gross').value||0);const requested=Number(document.getElementById('redeem').value||0);const maxPct=gross*CFG.MAX_REDEMPTION_PERCENT/100;const available=mxnFromPoints(c.points);const redeem=Math.max(0,Math.min(requested,maxPct,available));const paid=Math.max(0,gross-redeem);const earned=pointsFromPaid(paid);document.getElementById('purchasePreview').innerHTML=`Máximo por regla del ${CFG.MAX_REDEMPTION_PERCENT}%: <strong>${money(maxPct)}</strong><br>Canje aplicado: <strong>${money(redeem)}</strong><br>Pago efectivo: <strong>${money(paid)}</strong><br>Puntos a generar: <strong>${num(earned)} pts (${money(mxnFromPoints(earned))})</strong>`}
 function openModal(){document.getElementById('newClientModal').classList.remove('hidden')}function closeModal(){document.getElementById('newClientModal').classList.add('hidden')}
