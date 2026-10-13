@@ -1,7 +1,6 @@
 // Nouvelle Puntos · public.js v15
 // Consulta pública por folio + compatibilidad con enlaces privados por token.
 
-const CFG = window.NOUVELLE_CONFIG || {};
 let supa = null;
 
 const fmtMoney = (n) =>
